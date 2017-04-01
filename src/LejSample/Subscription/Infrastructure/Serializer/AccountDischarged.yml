@@ -1,0 +1,12 @@
+LejSample\Subscription\Domain\Model\AccountDischarged:
+  properties:
+    accountId:
+      type: Uuid
+    paymentId:
+      type: Uuid
+    balance:
+      type: Money
+    customer:
+      type: LejSample\Subscription\Domain\Model\Customer
+    occurredOn:
+      type: DateTimeImmutable

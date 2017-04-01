@@ -1,0 +1,8 @@
+.build
+.bundle
+.idea
+.vagrant
+
+composer.lock
+
+vendor/

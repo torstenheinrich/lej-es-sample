@@ -1,0 +1,8 @@
+LejSample\Subscription\Domain\Model\System:
+  properties:
+    id:
+      type: Uuid
+    name:
+      type: string
+    type:
+      type: string

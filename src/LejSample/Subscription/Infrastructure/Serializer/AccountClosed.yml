@@ -1,0 +1,10 @@
+LejSample\Subscription\Domain\Model\AccountClosed:
+  properties:
+    accountId:
+      type: Uuid
+    status:
+      type: string
+    customer:
+      type: LejSample\Subscription\Domain\Model\Customer
+    occurredOn:
+      type: DateTimeImmutable

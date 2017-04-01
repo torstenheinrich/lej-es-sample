@@ -1,0 +1,12 @@
+LejSample\Subscription\Domain\Model\AccountCreated:
+  properties:
+    accountId:
+      type: Uuid
+    balance:
+      type: Money
+    status:
+      type: string
+    customer:
+      type: LejSample\Subscription\Domain\Model\Customer
+    occurredOn:
+      type: DateTimeImmutable

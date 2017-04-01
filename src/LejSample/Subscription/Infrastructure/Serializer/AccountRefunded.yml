@@ -1,0 +1,12 @@
+LejSample\Subscription\Domain\Model\AccountRefunded:
+  properties:
+    accountId:
+      type: Uuid
+    refundId:
+      type: Uuid
+    balance:
+      type: Money
+    accountant:
+      type: LejSample\Subscription\Domain\Model\Accountant
+    occurredOn:
+      type: DateTimeImmutable

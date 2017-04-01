@@ -1,0 +1,10 @@
+LejSample\Subscription\Domain\Model\Customer:
+  properties:
+    id:
+      type: Uuid
+    name:
+      type: string
+    email:
+      type: string
+    type:
+      type: string
