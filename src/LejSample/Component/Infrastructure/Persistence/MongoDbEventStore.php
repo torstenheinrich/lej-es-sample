@@ -11,6 +11,8 @@ use Ramsey\Uuid\Uuid;
 
 class MongoDbEventStore implements EventStore
 {
+    /** @var EventDispatcher */
+    private $eventDispatcher;
     /** @var Client */
     private $client;
     /** @var string */
@@ -19,12 +21,18 @@ class MongoDbEventStore implements EventStore
     private $serializer;
 
     /**
+     * @param EventDispatcher $eventDispatcher
      * @param Client $client
      * @param string $database
      * @param SerializerInterface $serializer
      */
-    public function __construct(Client $client, string $database, SerializerInterface $serializer)
-    {
+    public function __construct(
+        EventDispatcher $eventDispatcher,
+        Client $client,
+        string $database,
+        SerializerInterface $serializer
+    ) {
+        $this->eventDispatcher = $eventDispatcher;
         $this->client = $client;
         $this->database = $database;
         $this->serializer = $serializer;
@@ -66,6 +74,10 @@ class MongoDbEventStore implements EventStore
         $this->client()
             ->selectCollection($this->database(), $id)
             ->insertMany($documents);
+
+        foreach ($events as $event) {
+            $this->eventDispatcher->dispatch($event);
+        }
     }
 
     /**

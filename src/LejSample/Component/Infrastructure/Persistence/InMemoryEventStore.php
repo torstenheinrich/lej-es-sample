@@ -8,8 +8,18 @@ use Lej\Component\Domain\Model\DomainEvent;
 
 class InMemoryEventStore implements EventStore
 {
+    /** @var EventDispatcher */
+    private $eventDispatcher;
     /** @var DomainEvent[][] */
     private $events = [];
+
+    /**
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     /**
      * {@inheritdoc}
@@ -24,10 +34,12 @@ class InMemoryEventStore implements EventStore
      */
     public function append(string $id, array $events)
     {
-        if (!isset($this->events[$id])) {
-            $this->events[$id] = [];
+        foreach ($events as $event) {
+            $this->events[$id][] = $event;
         }
 
-        $this->events[$id] += $events;
+        foreach ($events as $event) {
+            $this->eventDispatcher->dispatch($event);
+        }
     }
 }

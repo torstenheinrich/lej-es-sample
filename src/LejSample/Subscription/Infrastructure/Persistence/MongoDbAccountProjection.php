@@ -4,35 +4,25 @@ declare(strict_types=1);
 
 namespace LejSample\Subscription\Infrastructure\Persistence;
 
-use LejSample\Component\Infrastructure\Persistence\Projection;
+use Lej\Component\Domain\Model\DomainEvent;
+use LejSample\Component\Infrastructure\Persistence\EventDispatcher;
 use LejSample\Subscription\Domain\Model\AccountBilled;
 use LejSample\Subscription\Domain\Model\AccountClosed;
 use LejSample\Subscription\Domain\Model\AccountCreated;
 use LejSample\Subscription\Domain\Model\AccountDischarged;
 use LejSample\Subscription\Domain\Model\AccountRefunded;
 use MongoDB\BSON\UTCDateTime;
-use MongoDB\Client;
 
-class MongoDbAccountProjection extends Projection
+class MongoDbAccountProjection extends AbstractMongoDbRepository implements EventDispatcher
 {
-    /** @var Client */
-    private $client;
-    /** @var string */
-    private $database;
-    /** @var string */
-    private $collection;
-
-    /**
-     * @param Client $client
-     * @param string $database
-     * @param string $collection
-     */
-    public function __construct(Client $client, string $database, string $collection)
-    {
-        $this->client = $client;
-        $this->database = $database;
-        $this->collection = $collection;
-    }
+    /** @var bool[] */
+    private $understandsEvents = [
+        AccountCreated::class => true,
+        AccountBilled::class => true,
+        AccountDischarged::class => true,
+        AccountRefunded::class => true,
+        AccountClosed::class => true
+    ];
 
     /**
      * @param AccountCreated $event
@@ -44,8 +34,8 @@ class MongoDbAccountProjection extends Projection
             'balance' => $event->balance()->getAmount(),
             'currency' => $event->balance()->getCurrency()->getCode(),
             'status' => $event->status(),
-            'createdBy' => $event->customer()->id(),
-            'createdOn' => new UTCDateTime($event->occurredOn()->format('U')),
+            'createdBy' => $event->customer()->id()->toString(),
+            'createdOn' => new UTCDateTime($event->occurredOn()->format('U') * 1000),
             'updatedBy' => null,
             'updatedOn' => null
         ];
@@ -63,8 +53,8 @@ class MongoDbAccountProjection extends Projection
         $update = [
             '$set' => [
                 'balance' => $event->balance()->getAmount(),
-                'updatedBy' => $event->system()->id(),
-                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U')),
+                'updatedBy' => $event->system()->id()->toString(),
+                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U') * 1000),
             ]
         ];
 
@@ -81,8 +71,8 @@ class MongoDbAccountProjection extends Projection
         $update = [
             '$set' => [
                 'balance' => $event->balance()->getAmount(),
-                'updatedBy' => $event->customer()->id(),
-                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U')),
+                'updatedBy' => $event->customer()->id()->toString(),
+                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U') * 1000),
             ]
         ];
 
@@ -99,8 +89,8 @@ class MongoDbAccountProjection extends Projection
         $update = [
             '$set' => [
                 'balance' => $event->balance()->getAmount(),
-                'updatedBy' => $event->accountant()->id(),
-                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U')),
+                'updatedBy' => $event->accountant()->id()->toString(),
+                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U') * 1000),
             ]
         ];
 
@@ -117,8 +107,8 @@ class MongoDbAccountProjection extends Projection
         $update = [
             '$set' => [
                 'status' => $event->status(),
-                'updatedBy' => $event->customer()->id(),
-                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U')),
+                'updatedBy' => $event->customer()->id()->toString(),
+                'updatedOn' => new UTCDateTime($event->occurredOn()->format('U') * 1000),
             ]
         ];
 
@@ -128,26 +118,26 @@ class MongoDbAccountProjection extends Projection
     }
 
     /**
-     * @return Client
+     * {@inheritdoc}
      */
-    private function client() : Client
+    public function dispatch(DomainEvent $event)
     {
-        return $this->client;
+        $this->{'on' . substr(strrchr(get_class($event), '\\'), 1)}($event);
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    private function database() : string
+    public function registerEventDispatcher(EventDispatcher $dispatcher)
     {
-        return $this->database;
+        throw new \Exception('Registering additional event dispatchers is not supported.');
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    private function collection() : string
+    public function understands(DomainEvent $event) : bool
     {
-        return $this->collection;
+        return isset($this->understandsEvents[get_class($event)]) && $this->understandsEvents[get_class($event)];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace LejSample\Tests\Subscription\Domain\Model;
 
 use LejSample\Subscription\Domain\Model\Account;

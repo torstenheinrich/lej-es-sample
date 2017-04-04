@@ -107,6 +107,7 @@ class Account extends EventSourcedAggregateRoot implements Entity
     {
         // check invariants
         $this->ensureAccountActive();
+        $this->ensureSubscriptionsExist($subscriptions);
         $this->ensureSubscriptionsOfAccount($subscriptions);
 
         $lineItems = [];
@@ -254,6 +255,14 @@ class Account extends EventSourcedAggregateRoot implements Entity
     private function ensureAccountActive()
     {
         Assert::that($this->status())->eq('active');
+    }
+
+    /**
+     * @param Subscription[] $subscriptions
+     */
+    private function ensureSubscriptionsExist(array $subscriptions)
+    {
+        Assert::that($subscriptions)->notEmpty();
     }
 
     /**
