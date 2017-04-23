@@ -174,7 +174,7 @@ class AccountIntegrationTest
                 '(%02d) Id: %s, Data: %s, Type: %s',
                 $i,
                 $event->_id,
-                substr($event->data, 0, 64) . '...',
+                substr($event->data, 0, 64) . ' ... }',
                 $event->type
             );
             echo $message . PHP_EOL;
