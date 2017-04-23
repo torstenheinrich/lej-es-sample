@@ -193,13 +193,36 @@ class Account extends EventSourcedAggregateRoot implements Entity
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function equals(Entity $entity) : bool
+    {
+        return $entity instanceof Account
+            && $entity->id()->equals($this->id());
+    }
+
+    /**
      * Callback methods
      */
 
     /**
+     * {@inheritdoc}
+     */
+    protected function createEventHandlers() : array
+    {
+        return [
+            AccountCreated::class => function (AccountCreated $event) { $this->onAccountCreated($event); },
+            AccountBilled::class => function (AccountBilled $event) { $this->onAccountBilled($event); },
+            AccountDischarged::class => function (AccountDischarged $event) { $this->onAccountDischarged($event); },
+            AccountRefunded::class => function (AccountRefunded $event) { $this->onAccountRefunded($event); },
+            AccountClosed::class => function (AccountClosed $event) { $this->onAccountClosed($event); },
+        ];
+    }
+
+    /**
      * @param AccountCreated $event
      */
-    public function onAccountCreated(AccountCreated $event)
+    private function onAccountCreated(AccountCreated $event)
     {
         $this->id = $event->accountId();
         $this->balance = $event->balance();
@@ -210,7 +233,7 @@ class Account extends EventSourcedAggregateRoot implements Entity
     /**
      * @param AccountBilled $event
      */
-    public function onAccountBilled(AccountBilled $event)
+    private function onAccountBilled(AccountBilled $event)
     {
         $this->balance = $event->balance();
         $this->updatedBy = $event->system();
@@ -219,7 +242,7 @@ class Account extends EventSourcedAggregateRoot implements Entity
     /**
      * @param AccountDischarged $event
      */
-    public function onAccountDischarged(AccountDischarged $event)
+    private function onAccountDischarged(AccountDischarged $event)
     {
         $this->balance = $event->balance();
         $this->updatedBy = $event->customer();
@@ -228,7 +251,7 @@ class Account extends EventSourcedAggregateRoot implements Entity
     /**
      * @param AccountRefunded $event
      */
-    public function onAccountRefunded(AccountRefunded $event)
+    private function onAccountRefunded(AccountRefunded $event)
     {
         $this->balance = $event->balance();
         $this->updatedBy = $event->accountant();
@@ -237,19 +260,10 @@ class Account extends EventSourcedAggregateRoot implements Entity
     /**
      * @param AccountClosed $event
      */
-    public function onAccountClosed(AccountClosed $event)
+    private function onAccountClosed(AccountClosed $event)
     {
         $this->status = $event->status();
         $this->updatedBy = $event->customer();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(Entity $entity) : bool
-    {
-        return $entity instanceof Account
-            && $entity->id()->equals($this->id());
     }
 
     private function ensureAccountActive()

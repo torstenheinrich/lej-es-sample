@@ -108,10 +108,10 @@ class AccountIntegrationTest
             $balance = $account->balance();
 
             if ($account->createdBy() && !$account->updatedBy()) {
-                $format = '    (%02d) %53s with balance %3d %s, created by %6s (%s)';
+                $format = '(%02d) %53s with balance %3d %s, created by %6s (%s)';
                 $user = $account->createdBy();
             } else {
-                $format = '    (%02d) %53s with balance %3d %s, updated by %6s (%s)';
+                $format = '(%02d) %53s with balance %3d %s, updated by %6s (%s)';
                 $user = $account->updatedBy();
             }
 
@@ -147,7 +147,49 @@ class AccountIntegrationTest
             $data->createdBy(),
             $data->updatedBy()
         );
-        echo $message . PHP_EOL . PHP_EOL;
+        echo $message . PHP_EOL;
+
+        $i = 1;
+        echo PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo 'I MongoDB (Collections)                                          I' . PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo PHP_EOL;
+        $collections = $this->client()->selectDatabase($this->database())->listCollections();
+        foreach ($collections as $collection) {
+            $message = sprintf('(%02d) Name: %s', $i, $collection->getName());
+            echo $message . PHP_EOL;
+            $i++;
+        }
+
+        $i = 1;
+        echo PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo 'I MongoDB (Events)                                               I' . PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo PHP_EOL;
+        $events = $this->client()->selectCollection($this->database(), $accountId->toString());
+        foreach ($events->find() as $event) {
+            $message = sprintf(
+                '(%02d) Id: %s, Data: %s, Type: %s',
+                $i,
+                $event->_id,
+                substr($event->data, 0, 64) . '...',
+                $event->type
+            );
+            echo $message . PHP_EOL;
+            $i++;
+        }
+
+        echo PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo 'I MongoDB (Projection)                                           I' . PHP_EOL;
+        echo 'I----------------------------------------------------------------I' . PHP_EOL;
+        echo PHP_EOL;
+        $accounts = $this->client()->selectCollection($this->database(), 'account');
+        $account = $accounts->findOne(['_id' => $accountId->toString()]);
+        $message = sprintf('Account: %s', json_encode($account->getArrayCopy()));
+        echo $message . PHP_EOL;
     }
 
     /**

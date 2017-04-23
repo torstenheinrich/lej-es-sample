@@ -8,8 +8,16 @@ use Lej\Component\Domain\Model\DomainEvent;
 
 abstract class EventSourcedAggregateRoot
 {
+    /** @var \Closure[] */
+    protected $eventHandlers;
     /** @var DomainEvent[] */
-    protected $uncommittedEvents = [];
+    protected $uncommittedEvents;
+
+    public function __construct()
+    {
+        $this->eventHandlers = $this->createEventHandlers();
+        $this->uncommittedEvents = [];
+    }
 
     /**
      * @return DomainEvent[]
@@ -44,10 +52,21 @@ abstract class EventSourcedAggregateRoot
     }
 
     /**
-     * @param DomainEvent $event
+     * @return \Closure[]
      */
-    protected function applyEvent(DomainEvent $event)
+    abstract protected function createEventHandlers() : array;
+
+    /**
+     * @param DomainEvent $event
+     * @throws \Exception
+     */
+    private function applyEvent(DomainEvent $event)
     {
-        $this->{'on' . substr(strrchr(get_class($event), '\\'), 1)}($event);
+        $eventClass = get_class($event);
+        if (!isset($this->eventHandlers[$eventClass])) {
+            throw new \Exception(sprintf('No event handler found for type %s.', $eventClass));
+        }
+
+        $this->eventHandlers[$eventClass]->call($this, $event);
     }
 }
