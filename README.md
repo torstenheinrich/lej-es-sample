@@ -2,7 +2,7 @@
 
 This is a sample project using Event sourcing and CQRS with PHP for a
 talk I gave back in May 2017 at the [Leipzig Software Development Meetup](https://www.meetup.com/Leipzig-Software-Development-Meetup/).
-The slides for this talk can be found [here](LINK).
+The slides for this talk can be found [here](https://speakerdeck.com/theinrich/event-sourcing-cqrs-and-best-practices).
 
 ## Installation
 
